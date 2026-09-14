@@ -1,62 +1,107 @@
 from product_data import products
-# TODO: Step 1 - Print out the products to see the data that you are working with.
 
 
+# Print the first few products so I can see how the data is structured
+print("First few products:")
+for product in products[:5]:
+    print(product)
 
-# TODO: Step 2 - Create a list called customer_preferences and store the user preference in this list.
 
+# Store the customer's preferences in a list
+customer_preferences = []
 
 response = ""
+
 while response != "N":
     print("Input a preference:")
-    preference = input()
-    # Add the customer preference to the list
+    preference = input().lower()
+
+    customer_preferences.append(preference)
 
     response = input("Do you want to add another preference? (Y/N): ").upper()
-  
-
-# TODO: Step 3 - Convert customer_preferences list to set to eliminate duplicates.
 
 
+# Convert the customer preferences to a set to remove duplicates
+customer_preferences = set(customer_preferences)
 
-# TODO: Step 4 - Convert the product tags to sets in order to allow for faster comparisons.
+
+# Convert each product's tags into a set
 converted_products = []
 
+for product in products:
+    converted_product = {
+        "name": product["name"],
+        "tags": set(product["tags"])
+    }
+
+    converted_products.append(converted_product)
 
 
-
-# TODO: Step 5 - Write a function to calculate the number of matching tags
+# Count how many tags a product shares with the customer's preferences
 def count_matches(product_tags, customer_tags):
-    '''
-    Args:
-        product_tags (set): A set of tags associated with a product.
-        customer_tags (set): A set of tags associated with the customer.
-    Returns:
-        int: The number of matching tags between the product and customer.
-    '''
-    pass
+    matches = product_tags.intersection(customer_tags)
+    return len(matches)
 
 
-
-
-# TODO: Step 6 - Write a function that loops over all products and returns a sorted list of matches
+# Recommend products that have at least one matching tag
 def recommend_products(products, customer_tags):
-    '''
-    Args:
-        products (list): A list of product dictionaries.
-        customer_tags (set): A set of tags associated with the customer.
-    Returns:
-        list: A list of products containing product names and their match counts.
-    '''
-    pass
+    recommendations = []
+
+    for product in products:
+        match_count = count_matches(product["tags"], customer_tags)
+
+        if match_count > 0:
+            recommendations.append({
+                "name": product["name"],
+                "matches": match_count
+            })
+
+    recommendations.sort(key=lambda product: product["matches"], reverse=True)
+
+    return recommendations
 
 
+# Get the recommendations
+recommended_products = recommend_products(
+    converted_products,
+    customer_preferences
+)
 
-# TODO: Step 7 - Call your function and print the results
+
+# Print the recommendations
+print("\nRecommended Products:")
+
+if len(recommended_products) == 0:
+    print("No matching products found.")
+else:
+    for product in recommended_products:
+        print(f'- {product["name"]} ({product["matches"]} match(es))')
 
 
-
-
-# DESIGN MEMO (write below in a comment):
-# 1. What core operations did you use (e.g., intersections, loops)? Why?
-# 2. How might this code change if you had 1000+ products?
+# DESIGN MEMO
+#
+# For this program, I mainly used lists, sets, loops, functions, and set
+# intersections. I started with a list because the customer can enter more
+# than one preference and I needed somewhere to store each answer. After all
+# of the preferences were entered, I converted the list into a set. I did
+# this because a set removes duplicate values, so if someone enters the same
+# preference more than once it will not affect the results. I also converted
+# each product's tags into sets. This makes it easier to compare the product
+# tags with the customer's preferences.
+#
+# The main operation I used to find matches was an intersection. The
+# intersection gives me the values that are shared between the product tags
+# and the customer preferences. I used len() on the intersection to count
+# how many matches there were. I also used a loop to go through every
+# product in the catalog. If a product had at least one match, I added its
+# name and match count to the recommendations list. At the end, I sorted
+# the recommendations so the products with the most matches appear first.
+#
+# If the catalog had over 1,000 products, looping through every single
+# product would still work, but it could become slower as the catalog gets
+# much larger. I could improve it by organizing products based on their
+# tags ahead of time. For example, products with the "tech" tag could be
+# stored together. Then the program could search only the groups that match
+# the customer's preferences instead of checking every product. For a much
+# larger store, the product information would probably also be stored in a
+# database instead of directly inside a Python file.
